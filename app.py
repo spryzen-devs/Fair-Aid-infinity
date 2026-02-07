@@ -39,6 +39,9 @@ st.set_page_config(
     layout="wide"
 )
 
+# --- Page Config ---
+st.set_page_config(page_title="FairAid-Infinity", page_icon="⚖️", layout="wide")
+
 # --- Session State ---
 if 'mvp_step' not in st.session_state:
     st.session_state['mvp_step'] = 1 # 1: Sector, 2: Upload, 3: Map, 4: Dashboard
@@ -80,8 +83,9 @@ elif st.session_state['mvp_step'] == 2:
     uploaded_files = st.file_uploader("Upload CSVs", type=['csv'], accept_multiple_files=True)
     
     if uploaded_files:
-        if st.button("Process & Auto-Map"):
-            with st.spinner("Profiling Data & Inferring Columns..."):
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("Process & Auto-Map 🔍", type="primary"):
+            with st.spinner("🔄 Profiling Data & Inferring Columns..."):
                 dfs = DataLoader.load_files(uploaded_files)
                 master_df = pd.concat(dfs.values(), ignore_index=True)
                 st.session_state['raw_df'] = master_df
@@ -165,7 +169,8 @@ elif st.session_state['mvp_step'] == 3:
                     st.session_state['mapping'][k] = {'column': v, 'confidence': 1.0, 'source': 'User Manual Override', 'is_proxy': False}
                 st.rerun()
 
-    if st.button("Confirm Analysis & Proceed", type="primary"):
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("✓ Confirm Analysis & Proceed to Dashboard", type="primary"):
         st.session_state['mvp_step'] = 4
         st.rerun()
 
@@ -233,15 +238,17 @@ elif st.session_state['mvp_step'] == 4:
     
     # --- Step 5: Simulation ---
     st.divider()
-    st.header("2. Reallocation Simulation")
+    st.markdown("#### 🔄 Reallocation Simulation")
+    st.markdown("<br>", unsafe_allow_html=True)
     
     if not st.session_state['simulation_run']:
         st.info("""
-        **🔄 Reallocation Logic:**
+        **💡 Reallocation Logic:**
         The system automatically identifies **Overserved Regions** and re-routes a small portion (5%) of their surplus to **Critical Regions**.
         """)
         
-        if st.button("Run Reallocation Simulation 🚀", type="primary"):
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🚀 Run Reallocation Simulation", type="primary"):
             sim_df = ReallocationEngine.simulate(
                 base_df, 
                 aid_col=aid_c, 
@@ -272,7 +279,8 @@ elif st.session_state['mvp_step'] == 4:
         m2.metric("Total Aid Reallocated", f"${transferred:,.2f}")
         
         # Comparison Chart
-        st.subheader("Fairness: Before vs After")
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("#### 📊 Fairness: Before vs After")
         
         sim_df['abs_change'] = (sim_df['new_fairness_score'] - sim_df['fairness_score']).abs()
         top_affected = sim_df.sort_values('abs_change', ascending=False).head(15)
@@ -300,7 +308,8 @@ elif st.session_state['mvp_step'] == 4:
         st.plotly_chart(fig_compare, use_container_width=True)
         
         # Table
-        st.subheader("Reallocation Details")
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("#### 📋 Reallocation Details")
         display_cols = [region_c, 'role', aid_c, 'new_aid', 'transfer_amount', 'fairness_score', 'new_fairness_score']
         st.dataframe(sim_df[display_cols].style.format({
             aid_c: "${:,.0f}",
@@ -310,7 +319,8 @@ elif st.session_state['mvp_step'] == 4:
             'new_fairness_score': "{:.2f}"
         }))
         
-        if st.button("Reset Analysis"):
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🔄 Reset Analysis"):
             st.session_state['mvp_step'] = 1
             st.session_state['simulation_run'] = False
             st.session_state['sector'] = None

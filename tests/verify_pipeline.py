@@ -60,27 +60,29 @@ def test_pipeline():
         print(imp_df[['norm_outcome', 'norm_dropout']])
     
     # 6. Need Calculation (Education)
-    imp_df['sector_need'] = NeedEngine.calculate_need(imp_df, "Education")
+    imp_df = NeedEngine.calculate_need(imp_df, mapping, "Education")
     print("\nNeed Calculation:")
-    print(imp_df[['norm_region', 'sector_need']])
+    print(imp_df[['norm_region', 'need_score']])
     
     # 7. Fairness
-    fair_df = FairnessEngine.calculate_fairness(imp_df, need_col='sector_need')
+    fair_df = FairnessEngine.calculate_fairness(imp_df, 
+                                               aid_col='norm_aid', 
+                                               population_col='norm_population', 
+                                               need_score_col='need_score')
     print("\nFairness Scores:")
-    print(fair_df[['norm_region', 'fairness_score', 'is_left_out']])
+    print(fair_df[['norm_region', 'fairness_score']])
     
     # 8. Reallocation
     # Region B and D have low funding and high poverty/low literacy -> Should have high Need.
     # Region A and C have high funding and low need.
     # Expect B or D to be Receivers. C to be Donor.
     
-    realloc_df = ReallocationEngine.identify_roles(fair_df, need_col='sector_need')
-    print("\nReallocation Roles:")
-    print(realloc_df[['norm_region', 'reallocation_role']])
-    
-    sim_df = ReallocationEngine.simulate_reallocation(realloc_df, need_col='sector_need')
+    realloc_df = ReallocationEngine.simulate(fair_df, 
+                                            aid_col='norm_aid', 
+                                            pop_col='norm_population', 
+                                            need_col='need_score')
     print("\nSimulation Result:")
-    print(sim_df[['norm_region', 'norm_aid', 'new_aid', 'transfer_out', 'transfer_in']])
+    print(realloc_df[['norm_region', 'norm_aid', 'new_aid', 'transfer_amount', 'role']])
     
     print("\n--- Pipeline Verified Successfully ---")
 

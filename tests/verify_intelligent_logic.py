@@ -51,11 +51,11 @@ def test_intelligent_engine():
     print(f"  DROPOUT Proxy: {dropout_meta}")
     
     if dropout_meta and dropout_meta['is_proxy']:
-        print("✅ DROPOUT Proxy Generated successfully!")
+        print("[SUCCESS] DROPOUT Proxy Generated successfully!")
         print(f"   Source: {dropout_meta['source']}")
         print(enriched_df[['district_name', 'literacy_rate', dropout_meta['column']]])
     else:
-        print("❌ Failed to generate DROPOUT proxy.")
+        print("[FAILURE] Failed to generate DROPOUT proxy.")
         
     # 4. Test Need Calculation with Proxies
     print("\n[Testing Need Engine with Proxies]")
@@ -63,7 +63,7 @@ def test_intelligent_engine():
     print(need_df[['district_name', 'need_score']])
     
     if 'need_score' in need_df.columns:
-        print("✅ Need Score calculated successfully using mapped columns.")
+        print("[SUCCESS] Need Score calculated successfully using mapped columns.")
 
 if __name__ == "__main__":
     test_intelligent_engine()

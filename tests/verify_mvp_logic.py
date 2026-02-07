@@ -26,9 +26,12 @@ def test_mvp_logic():
     
     # 2. Test Need Engine
     print("\n[Testing Need Engine]")
-    # We expect normalization 0-1. 
-    # Poverty: 0.1->0.0, 0.5->0.57, 0.8->1.0 (approx)
-    df = NeedEngine.calculate_need(df, ['poverty', 'dropout'])
+    # Create mock mapping
+    mapping = {
+        'POVERTY': {'column': 'poverty'},
+        'DROPOUT': {'column': 'dropout'}
+    }
+    df = NeedEngine.calculate_need(df, mapping, "Education")
     print(df[['region', 'need_score']])
     
     # 3. Test Fairness Engine
@@ -50,9 +53,9 @@ def test_mvp_logic():
     
     print(f"\nTotal Aid Before: {total_old}, After: {total_new}")
     if diff < 1.0:
-        print("✅ Aid Conserved!")
+        print("[SUCCESS] Aid Conserved!")
     else:
-        print("❌ Aid LEAKAGE detected!")
+        print("[FAILURE] Aid LEAKAGE detected!")
         
     # Verify Overserved was Taxed
     overserved = df[df['role'] == 'Overserved']
@@ -60,9 +63,9 @@ def test_mvp_logic():
         taxed_amount = overserved['transfer_amount'].sum()
         print(f"Overserved regions taxed total: {taxed_amount}")
         if taxed_amount < 0:
-             print("✅ Overserved regions were taxed.")
+             print("[SUCCESS] Overserved regions were taxed.")
         else:
-             print("❌ Overserved regions were NOT taxed.")
+             print("[FAILURE] Overserved regions were NOT taxed.")
 
     # Verify Underserved Received
     underserved = df[df['role'] == 'Underserved']
@@ -70,9 +73,9 @@ def test_mvp_logic():
         received = underserved['transfer_amount'].sum()
         print(f"Underserved regions received total: {received}")
         if received > 0:
-             print("✅ Underserved regions received aid.")
+             print("[SUCCESS] Underserved regions received aid.")
         else:
-             print("❌ Underserved regions received NOTHING.")
+             print("[FAILURE] Underserved regions received NOTHING.")
 
 if __name__ == "__main__":
     test_mvp_logic()
